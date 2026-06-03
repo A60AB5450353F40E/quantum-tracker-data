@@ -17,7 +17,7 @@
 | Consensus | A | ✅ | Shipped |
 | P2P Networking | F | ❌ | Not Discussed |
 | On-Chain Logic | C | 🗺️ | Roadmapped |
-| Other Features | D | 🗺️ | Native tokens inherit from on-chain logic |
+| Other Features | D | 🗺️ | Native tokens & dapps inherit from on-chain logic |
 | EC Sunset | E | 🗺️ | Discussed |
 
 Bitcoin Cash forked from Bitcoin before SegWit, so its baseline cryptographic surface differs in places: there is no Taproot, no native Schnorr per [BIP-340](https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki). BCH adopted its own Schnorr variant in [May 2019](https://upgradespecs.bitcoincashnode.org/2019-05-15-upgrade/) (singlesig) and [November 2019](https://upgradespecs.bitcoincashnode.org/2019-11-15-upgrade/) (multisig), on the same secp256k1 curve. There is no [BIP-324](https://bips.dev/324/) v2 transport on BCH.
@@ -93,7 +93,11 @@ Bitcoin Cash extended Bitcoin Script in two material directions. [CHIP-2021-02 (
 
 **Current state.** CashTokens fungible and non-fungible primitives derive token category IDs from UTXO reference (not EC) which is hash-based and quantum resistant. Issuer authority over NFT commitments is typically exercised through ECDSA / Schnorr signatures, so token issuance remains exposed to the chain-level signature scheme. However, tokens can be locked with Lamport-OTS or LM-OTS just the same as BCH can, which is the basis of Quantumroot. A NFT would serve as authentication to the vault, and user could manage OTS key rotation on the NFT without affecting vault's receive functionality.
 
-**Planned future work.** None published. Token-issuance security tracks the chain-level signature scheme.
+### DeFi (layer 1)
+
+**Current state.** Dapps (e.g. [AnyHedge](https://gitlab.com/GeneralProtocols/anyhedge), [ParyonUSD](https://paryonusd.com/docs)) still rely on OP_CHECKSIG and OP_CHECKDATASIG in some places. However, some contract systems are already architected to allow smooth transition to PQC. For example, ParyonUSD contracts use user-held authorization NFTs for user operations, and those NFTs can be migrated from P2PKH to a composable vault or a PQC smart contract. The oracle feed is signed with Schnorr, but oracle is the only mutable part of ParyonUSD contract system and it can be upgraded to PQC later on.
+
+**Planned future work.** None published. Token-issuance and DeFi security tracks the chain-level signature scheme and smart contract capabilities.
 
 ## 6. EC Sunset
 
