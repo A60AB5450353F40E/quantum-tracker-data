@@ -5,7 +5,7 @@
 | **Name** | Bitcoin Cash |
 | **Ticker** | BCH |
 | **Website** | <https://bitcoincash.org> |
-| **GitHub** | <https://github.com/bitcoincashorg> |
+| **GitHub** | <https://gitlab.com/bitcoin-cash-node/bitcoin-cash-node> |
 | **Derived from** | Bitcoin |
 | **On-chain environment** | Bitcoin Script (with BCH extensions) |
 
@@ -17,18 +17,25 @@
 | Consensus | A | ✅ | Shipped |
 | P2P Networking | F | ❌ | Not Discussed |
 | On-Chain Logic | C | 🗺️ | Roadmapped |
-| Other Features | F | ❌ | Not Discussed |
-| EC Sunset | F | ❌ | Not Discussed |
+| Other Features | D | 🗺️ | Native tokens inherit from on-chain logic |
+| EC Sunset | E | 🗺️ | Discussed |
 
-Bitcoin Cash forked from Bitcoin before SegWit, so its baseline cryptographic surface differs in places: there is no Taproot, no native Schnorr per [BIP-340](https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki) (BCH adopted its own Schnorr variant in May 2019, on the same secp256k1 curve), and no [BIP-324](https://bips.dev/324/) v2 transport. The chain extended Bitcoin Script with native introspection opcodes (CHIP-2021-02, May 2022) and CashTokens (May 2023) for fungible and non-fungible token primitives.
+Bitcoin Cash forked from Bitcoin before SegWit, so its baseline cryptographic surface differs in places: there is no Taproot, no native Schnorr per [BIP-340](https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki). BCH adopted its own Schnorr variant in [May 2019](https://upgradespecs.bitcoincashnode.org/2019-05-15-upgrade/) (singlesig) and [November 2019](https://upgradespecs.bitcoincashnode.org/2019-11-15-upgrade/) (multisig), on the same secp256k1 curve. There is no [BIP-324](https://bips.dev/324/) v2 transport on BCH.
 
-The most concrete PQC work is [Quantumroot](https://news.bitcoin.com/quantumroot-debuts-on-bitcoin-cash-first-post-quantum-vault-on-bitcoin-script/), a hash-based vault primitive using **LM-OTS** (Leighton-Micali One-Time Signatures, SHA-256–based) developed by Jason Dreyzehner. Quantumroot is already deployed on Chipnet (BCH's preview network), with mainnet activation planned for May 2026. It targets 256-bit classical / 128-bit quantum security and is structured as opt-in vaults rather than a chain-wide signature replacement.
+The chain extended Bitcoin Script (now called [CashVM](https://vm.cash/opcodes)) with native introspection opcodes ([CHIP-2021-02](https://gitlab.com/GeneralProtocols/research/chips/-/blob/master/CHIP-2021-02-Add-Native-Introspection-Opcodes.md), [May 2022](https://upgradespecs.bitcoincashnode.org/2022-05-15-upgrade/)) and native tokens ([CHIP-2022-02 "CashTokens"](https://github.com/bitjson/cashtokens), [May 2023](https://upgradespecs.bitcoincashnode.org/2023-05-15-upgrade/)) for fungible and non-fungible token primitives as first-class citizens. Further, in 2025 BCH Script was extended with BigInt arithmetic operations ([CHIP-2024-07](https://github.com/bitjson/bch-bigint/blob/master/readme.md), [May 2025](https://upgradespecs.bitcoincashnode.org/2025-05-15-upgrade/)) and increased VM execution limits ([CHIP-2021-05](https://github.com/bitjson/bch-vm-limits/blob/master/readme.md), May 2025). Finally, on May 15th 2026 BCH Script was extended with remaining bitwise opcodes ([CHIP-2025-05](https://github.com/bitjson/bch-bitwise), [May 2026](https://upgradespecs.bitcoincashnode.org/2026-05-15-upgrade/)), and adding loop ([CHIP-2021-05](https://github.com/bitjson/bch-loops), May 2026) and function opcodes ([CHIP-2025-05](https://github.com/bitjson/bch-functions), May 2026).
+
+With PQC TXs being much bigger, adaptive blocksize limit algorithm ([CHIP-2023-04 "ABLA"](https://gitlab.com/0353F40E/ebaa/-/blob/main/README.md), [May 2024](https://upgradespecs.bitcoincashnode.org/2024-05-15-upgrade/)) is also relevant as it will ensure auto-scaling the blocksize limit when need arises. For wallet smart contract implementaions, availibility of P2SH32 ([CHIP-2022-05](https://gitlab.com/0353F40E/p2sh32/-/blob/f58ecf835f58555c9087c53af25da92a0e74534c/CHIP-2022-05_Pay-to-Script-Hash-32_%28P2SH32%29_for_Bitcoin_Cash.md), May 2023) and allowing non-standard locking scripts ("P2S" [CHIP-2024-12](https://github.com/bitjson/bch-p2s), May 2026) are relevant chain features as well.
+
+The most concrete PQC work is [Quantumroot](https://blog.bitjson.com/quantumroot/), a hash-based vault primitive using **LM-OTS** (Leighton-Micali One-Time Signatures, SHA-256–based) developed by Jason Dreyzehner. Quantumroot [smart contracts are available](https://ide.bitauth.com/import-gist/60e779f718515b83fb80706e078acdb3) and, with May 2026 upgrade now activated, they can be deployed on BCH mainnet wihout needing any further consensus changes. It is now just a matter of library & wallet support. Sending & receiving can work with the same address UX users are used to (give out a constant P2SH32 32-byte receive address, wallets scan the chain for UTXOs to spend and construct sending transactions), and the same system can be used to secure native tokens ("CashTokens"). Quantumroot targets 256-bit classical / 128-bit quantum security and is structured as opt-in vaults under the hood, rather than a chain-wide signature replacement. Currently, no wallet has implemented it.
+
+It is relevant to mention [WalletConnect](https://github.com/mainnet-pat/wc2-bch-bcr), [WizardConnect](https://docs.riftenlabs.com/wizardconnect/), and [CashConnect](https://cashconnect.developers.cash/) wallet-dapp interaction technologies. These were originally built for L1 DeFi uses, but are relevant for building out QC-resistant wallets just the same. All of them have been deployed in at least some wallets in the current wallet ecosystem.
 
 ## Proposed and Implemented PQC Algorithms
 
 | Algorithm | Replaces | Category | Status |
 |-----------|----------|----------|--------|
-| **LM-OTS** (Leighton-Micali One-Time Signatures, SHA-256–based) | ECDSA secp256k1, Schnorr secp256k1 (vault scope) | On-Chain (Quantumroot vaults) | Roadmapped (Chipnet live; mainnet activation planned May 2026) |
+| **LM-OTS** (Leighton-Micali One-Time Signatures, SHA-256–based) | ECDSA secp256k1, Schnorr secp256k1 (vault scope) | On-Chain (Quantumroot vaults) | Available (mainnet supports it, awaiting first wallet deployment) |
+| **Lamport-OTS** (Lamport One-Time Signatures, [PoC RIPEMD-160-based](https://dorahacks.io/buidl/36826)) | ECDSA secp256k1, Schnorr secp256k1 (one-time use context) | On-Chain (Smart contract) | Available (mainnet supports it, no wallet or dapp uses it)
 
 ## 1. Transaction Signatures
 
@@ -84,30 +91,31 @@ Bitcoin Cash extended Bitcoin Script in two material directions. [CHIP-2021-02 (
 
 ### CashTokens (token layer)
 
-**Current state.** CashTokens fungible and non-fungible primitives derive token category IDs from UTXO position (not EC). Issuer authority over NFT commitments is exercised through ECDSA / Schnorr signatures, so token issuance remains exposed to the chain-level signature scheme.
+**Current state.** CashTokens fungible and non-fungible primitives derive token category IDs from UTXO reference (not EC) which is hash-based and quantum resistant. Issuer authority over NFT commitments is typically exercised through ECDSA / Schnorr signatures, so token issuance remains exposed to the chain-level signature scheme. However, tokens can be locked with Lamport-OTS or LM-OTS just the same as BCH can, which is the basis of Quantumroot. A NFT would serve as authentication to the vault, and user could manage OTS key rotation on the NFT without affecting vault's receive functionality.
 
 **Planned future work.** None published. Token-issuance security tracks the chain-level signature scheme.
 
 ## 6. EC Sunset
 
-**Grade: F ❌**
+**Grade: E 🗺️**
 
 > Adding PQC alongside EC is not the same as retiring EC. For reference, Bitcoin Cash's PQC-adoption ratings per category are: Tx Signatures ❌, Consensus ✅, P2P ❌, On-Chain 🗺️, Other ❌.
 
-Bitcoin Cash has no published plan to retire elliptic-curve cryptography. The chain adopted Schnorr alongside ECDSA in 2019, both on secp256k1 — additive rather than substitutive — and the Quantumroot path is structured as opt-in vaults, again additive. There is no equivalent to Bitcoin's [BIP-361](https://github.com/bitcoin/bips/blob/master/bip-0361.mediawiki) sunset proposal in the BCH CHIP repository.
+["Quantum-Resistant Bitcoin Cash: A Challenge-Based Transition Protocol"](https://bitcoincashresearch.org/t/quantum-resistant-bitcoin-cash-a-challenge-based-transition-protocol/1804/1) has been published on Bitcoin Cash Research, which proposes an open-ended commit-delay-reveal-challenge protocol that would allow original key owners to secure their coins without needing to reveal themselves on chain, at least until a QC salvager would force their hand. The proposal doesn't sunset EC opcodes but makes them practically unusable through delay & challenge mechanisms, while keeping the migration path indefinitely open.
 
 **Current state.** No EC retirement scheduled.
 
-**Planned future work.** None published.
+**Planned future work.** Early works published.
 
 ## Governance
 
-Bitcoin Cash protocol changes are coordinated through the [CHIP (Cash Improvement Proposal) process](https://github.com/bitcoincashorg/bitcoincash.org), with implementation across multiple node implementations (Bitcoin Cash Node, Bitcoin ABC, Bitcoin Unlimited). Changes activate through coordinated annual upgrades when CHIPs reach community consensus. Discussion happens on [Bitcoin Cash Research](https://bitcoincashresearch.org/) and the chain's CHIP repositories.
+Bitcoin Cash protocol changes are coordinated through the [CHIP (Cash Improvement Proposal) process](https://gitlab.com/im_uname/cash-improvement-proposals/-/blob/master/CHIPs.md), with implementation across multiple node implementations ([Bitcoin Cash Node](https://gitlab.com/bitcoin-cash-node/bitcoin-cash-node) (main), [BCHD](https://github.com/gcash/bchd), [Flowee](https://codeberg.org/Flowee/thehub/releases/tag/2026.05.2)). Changes activate through coordinated annual upgrades when CHIPs reach community consensus. Discussion happens on [Bitcoin Cash Research](https://bitcoincashresearch.org/) and the chain's CHIP repositories.
 
 PQ-relevant work currently visible:
 
 - [Quantumroot (LM-OTS vaults)](https://news.bitcoin.com/quantumroot-debuts-on-bitcoin-cash-first-post-quantum-vault-on-bitcoin-script/) — deployed on Chipnet (preview network); mainnet activation planned for May 2026. Authored by Jason Dreyzehner.
 - [Bitcoin Cash Research thread on PQC](https://bitcoincashresearch.org/t/post-quantum-cryptography/845) — community discussion thread on post-quantum cryptography options for BCH.
+- ["Quantum-Resistant Bitcoin Cash: A Challenge-Based Transition Protocol"](https://bitcoincashresearch.org/t/quantum-resistant-bitcoin-cash-a-challenge-based-transition-protocol/1804/1) — paper proposing an open-ended commit-delay-reveal-challenge migration protocol.
 
 PQ-adjacent work (existing EC-based primitives):
 
